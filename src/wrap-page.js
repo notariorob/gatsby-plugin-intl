@@ -36,6 +36,20 @@ const withIntlProvider = (intl) => children => {
   )
 }
 
+const replaceParams = (path, props) => {
+  const regex = /\:(\w+)/g
+
+  let newPath = path
+  let match
+  while ((match = regex.exec(path)) !== null) {
+    newPath = newPath.replace(
+      new RegExp(match[0], "g"),
+      props[match[1]] || match[0]
+    )
+  }
+  return newPath
+}
+
 export default ({ element, props }, pluginOptions) => {
   if (!props) {
     return
@@ -69,7 +83,8 @@ export default ({ element, props }, pluginOptions) => {
       }
 
       const queryParams = search || ""
-      const newUrl = withPrefix(`/${detected}${originalPath}${queryParams}`)
+      const newPath = replaceParams(location.pathname, props)
+      const newUrl = withPrefix(`/${detected}${newPath}${queryParams}`)
       window.localStorage.setItem("gatsby-intl-language", detected)
       window.location.replace(newUrl)
     }
