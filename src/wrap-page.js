@@ -23,7 +23,7 @@ const polyfillIntl = language => {
   }
 }
 
-const withIntlProvider = (intl) => children => {
+const withIntlProvider = intl => children => {
   polyfillIntl(intl.language)
   return (
     <IntlProvider
@@ -84,7 +84,12 @@ export default ({ element, props }, pluginOptions) => {
 
       const queryParams = search || ""
       const newPath = replaceParams(location.pathname, props)
-      const newUrl = withPrefix(`/${detected}${newPath}${queryParams}`)
+      // Make sure there is no language present (solves issue with browser back)
+      let pathWithoutLang = newPath
+      languages.forEach(lang => {
+        pathWithoutLang = pathWithoutLang.replace(`/${lang}/`, "/")
+      })
+      const newUrl = withPrefix(`/${detected}${pathWithoutLang}${queryParams}`)
       window.localStorage.setItem("gatsby-intl-language", detected)
       window.location.replace(newUrl)
     }
